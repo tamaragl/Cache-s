@@ -5,33 +5,35 @@
 	 * EXPIRATION CACHE :: MAX-AGE
 	 * ------------------------------------------
 	 */
-		header('Pragma: cache');
-		header('Cache-control:max-age=30, public');	
+		//8 hours
+		header('Cache-Control: max-age=28800');
 
 
 	/**
 	 * EXPIRATION CACHE :: EXPIRATION HEADER
 	 * ------------------------------------------
 	 */
+		//header( 'Expires: '.gmdate( 'D, d M Y H:i:s', strtotime( "now" ) + 3600 ) );
+		
 		$datetime = time() + (7 * 24 * 60 * 60);
 		$expiration = date('D, d M Y H:i:s', $datetime) . ' GMT';
-
 		header('Expires:' . $expiration);		
-		header('Pragma: cache');		
-		header('Cache-control: public');
+		
+		//header('Pragma: cache');		
+		//header('Cache-control: public');
 
 
 	/**
 	 * VALIDATION CACHE :: eTag
 	 * ------------------------------------------
 	 */
-		session_cache_limiter('public');
+		//session_cache_limiter('public');
 
-		$etag_hash = md5($this->server->getValue('REQUEST_URI', 'text'));	
+		$etag_hash = md5($_SERVER['REQUEST_URI']);	
 		
 		//Para preguntar al servidor si se ha modificado el recurso
-		$if_none_match = $this->server->getValue('HTTP_IF_NONE_MATCH', 'text');
-
+		$if_none_match = $_SERVER['HTTP_IF_NONE_MATCH'];
+		
 		if( $if_none_match )
 		{
 			//No se ha modificado el recurso
@@ -69,4 +71,18 @@
 		{	
 			header('HTTP/1.1 304 Not Modified');
 
+		}
+		
+		/******** other example **************/
+		
+		$filetime = filemtime('file.txt');
+ 
+		if ( isset( $_SERVER['HTTP_IF_MODIFIED_SINCE'] && strtotime( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) == $filetime )
+		{
+			header( 'HTTP/1.1 304 Not Modified' );
+		}
+		else
+		{
+			header( 'Last-Modified: '.gmdate( 'D, d M Y H:i:s', $filemtime ) );
+			// Acciones y llamadas si se ha detectado que el archivo ha sido modificado.
 		}
